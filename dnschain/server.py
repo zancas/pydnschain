@@ -1,4 +1,4 @@
-import json, urllib, httplib, logging
+import json, urllib, logging
 
 class MalformedJSON(Exception):
     pass
@@ -19,7 +19,7 @@ class Server:
 
         self.addr = addr
         self.fingerprint = fingerprint
-        self.connection = httplib.HTTPConnection(addr)
+        self.urlopener = urllib.FancyURLopener()
 
     def lookup(self, name):
         """
@@ -31,10 +31,9 @@ class Server:
         """
         #uname = name.encode("utf-8")#Per taoeffect's recommendation I'm asserting that it's the caller's responsibility to pass in valid "name" values.
         url_safe_name = urllib.quote(name, safe="") #Meant to be a url path _component_.
-        path = "/id/%s" % (url_safe_name,)
-        self.connection.request("GET", path)
-        namecoin_response = self.connection.getresponse()
-        namecoin_string = namecoin_response.read()
+        full_url = "http://%s/id/%s" % (self.addr, url_safe_name)
+        response = self.urlopener.open(full_url)
+        namecoin_string = response.read()
         try:
             data = json.loads(namecoin_string)
         except ValueError, e:
