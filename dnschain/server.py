@@ -1,5 +1,7 @@
 import json, urllib, httplib
 
+class MalformedJSON(Exception):
+    pass
 
 class Server:
     """
@@ -40,14 +42,12 @@ class Server:
                 print "The name: %s was not found in the database, returning None." % (url_safe_name)
                 return None
             else:
-                print "Instead of JSON we got this:\n%s\n" % (e,)
-                import sys
-                sys.exit(99) #Fail hard.
+                raise MalformedJSON("%s\nData Follows:\n'''\n%s\n'''" % (e, namecoin_string))
         return data
 
 
 if __name__ == '__main__':
-    #DNSChainServer = Server("192.184.93.146", "NOTYETIMPLEMENTED")#Seems to coerce to https. 443?
-    DNSChainServer = Server("dns.dnschain.net", "NOTYETIMPLEMENTED")
+    DNSChainServer = Server("192.184.93.146", "NOTYETIMPLEMENTED")#Seems to coerce to https. 443?
+    #DNSChainServer = Server("dns.dnschain.net", "NOTYETIMPLEMENTED")
     print DNSChainServer.lookup("greg")
     print DNSChainServer.lookup("OAUF:EUIERPEWEOPHOUH:QBP&(@PG$UFR:G//DFUhSUG")
