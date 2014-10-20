@@ -1,4 +1,4 @@
-import json, urllib, httplib
+import json, urllib, httplib, logging
 
 class MalformedJSON(Exception):
     pass
@@ -29,7 +29,7 @@ class Server:
 
         @param name: The name to lookup, e.g. 'id/dionyziz'
         """
-        #uname = name.encode("utf-8")#Who knows what bytes will be submitted?! Look up dnschain spec.
+        #uname = name.encode("utf-8")#Per taoeffect's recommendation I'm asserting that it's the caller's responsibility to pass in valid "name" values.
         url_safe_name = urllib.quote(name, safe="") #Meant to be a url path _component_.
         path = "/id/%s" % (url_safe_name,)
         self.connection.request("GET", path)
@@ -39,15 +39,15 @@ class Server:
             data = json.loads(namecoin_string)
         except ValueError, e:
             if namecoin_string.startswith("Not Found: "):
-                print "The name: %s was not found in the database, returning None." % (url_safe_name)
-                return None
+                logging.log(1, "The name: %s was not found in the database, returning None.", url_safe_name)
+                data = None
             else:
                 raise MalformedJSON("%s\nData Follows:\n'''\n%s\n'''" % (e, namecoin_string))
         return data
 
 
 if __name__ == '__main__':
-    DNSChainServer = Server("192.184.93.146", "NOTYETIMPLEMENTED")#Seems to coerce to https. 443?
-    #DNSChainServer = Server("dns.dnschain.net", "NOTYETIMPLEMENTED")
+    #DNSChainServer = Server("192.184.93.146", "NOTYETIMPLEMENTED")#Seems to coerce to https. 443?
+    DNSChainServer = Server("dns.dnschain.net", "NOTYETIMPLEMENTED")
     print DNSChainServer.lookup("greg")
     print DNSChainServer.lookup("OAUF:EUIERPEWEOPHOUH:QBP&(@PG$UFR:G//DFUhSUG")
