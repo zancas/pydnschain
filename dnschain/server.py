@@ -3,9 +3,6 @@ import json, urllib2, logging
 class MalformedJSON(Exception):
     pass
 
-class MisformattedName(Exception):
-    pass
-
 class Server:
     """
     A connection to a DNSChain server.
