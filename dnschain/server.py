@@ -22,7 +22,7 @@ class Server:
 
         self.addr = addr
         self.fingerprint = fingerprint
-        self.headers = {'Host': 'namecoin.dns:80'}#Per http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+        self.headers = {'Host': 'namecoin.dns'}#Per http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 
     def lookup(self, name):
         """
