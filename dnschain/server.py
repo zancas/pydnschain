@@ -1,4 +1,4 @@
-import json, urllib2, logging
+import json, urllib2
 
 from log import LoggingMixin
 
