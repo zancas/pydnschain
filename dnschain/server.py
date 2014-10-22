@@ -1,9 +1,11 @@
 import json, urllib2, logging
 
+from log import LoggingMixin
+
 class MalformedJSON(Exception):
     pass
 
-class Server:
+class Server(LoggingMixin):
     """
     A connection to a DNSChain server.
     """
@@ -16,7 +18,7 @@ class Server:
         TODO: May need port here?
         @param fingerprint: The key fingerprint of the DNSChain server, for connection authorization
         """
-
+        self._logger_helper(__name__)
         self.addr = addr
         self.fingerprint = fingerprint
         self.headers = {'Host': http_host_header}#Per http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
@@ -38,8 +40,8 @@ class Server:
         try:
             response = urllib2.urlopen(request)
         except urllib2.HTTPError, e:
-            if e.reason == "Not Found":
-                logging.log(1, "The name: %s was not found in the database, raised %s." % (name, e))
+            if e.code == 404:
+                self._log.debug("Raised: '%s', for reason '%s'." % (e, e.reason), exc_info=True)
                 raise e
 
         namecoin_string = response.read()
@@ -56,4 +58,6 @@ if __name__ == '__main__':
     print DNSChainServer.lookup("id/greg")
     print DNSChainServer.lookup("d/greg")
     #print DNSChainServer.lookup("greg")
-    print DNSChainServer.lookup("id/OAUF:EUIERPEWEOPHOUH:QBP&(@PG$UFR:G//DFUhSUG")
+    DNSChainServer.lookup("id/OAUF:EUIERPEWEOPHOUH:QBP&(@PG$UFR:G//DFUhSUG")
+
+
