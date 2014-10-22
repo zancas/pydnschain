@@ -2,8 +2,20 @@ import json, urllib2
 
 from log import LoggingMixin
 
+
 class MalformedJSON(Exception):
     pass
+
+
+class DataNotFound(Exception):
+    def __init__(self, HTTP404Error, name, blockchain):
+        self.code = 404
+        self.msg = "The name: %s was not found in the queried blockchain: %s."\
+                   % (name, blockchain)
+        self.hdrs = HTTP404Error.hdrs
+        self.fp = HTTP404Error.fp
+        self.filename = HTTP404Error.filename
+
 
 class Server(LoggingMixin):
     """
@@ -41,14 +53,16 @@ class Server(LoggingMixin):
             response = urllib2.urlopen(request)
         except urllib2.HTTPError, e:
             if e.code == 404:
-                self._log.debug("Raised: '%s', for reason '%s'." % (e, e.reason), exc_info=True)
+                e = DataNotFound(e, name, self.headers['Host'])
+            if e.code < 200 or e.code > 299:
+                self._log.debug("Raised: '%s', for reason '%s'." % (e, e.msg), exc_info=True)
                 raise e
 
         namecoin_string = response.read()
         try:
             data = json.loads(namecoin_string)
-        except ValueError, e:
-                raise MalformedJSON("%s\nData Follows:\n'''\n%s\n'''" % (e, namecoin_string))
+        except ValueError:
+            raise MalformedJSON("%s\n%s" % (ValueError, namecoin_string))
         return data
 
 
@@ -59,5 +73,3 @@ if __name__ == '__main__':
     print DNSChainServer.lookup("d/greg")
     #print DNSChainServer.lookup("greg")
     DNSChainServer.lookup("id/OAUF:EUIERPEWEOPHOUH:QBP&(@PG$UFR:G//DFUhSUG")
-
-
